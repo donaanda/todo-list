@@ -1,9 +1,13 @@
 import 'materialize-css/dist/css/materialize.min.css';
 import React, {Component} from 'react';
 import '../assets/css/app.css';
+import axios from 'axios';
 import List from './list';
 import AddItem from './add-items';
 import listData from '../helpers/list_data';
+
+const BASE_URL = 'http://api.reactprototypes.com';
+const API_KEY = '?key=csgocsgo';
 
 class App extends Component {
     constructor(props) {
@@ -18,24 +22,40 @@ class App extends Component {
         this.getListData();
     }
 
-    deleteItem(index) {
-        const listData = this.state.listData.slice();
+    async deleteItem(id) {
 
-        listData.splice(index, 1);
+        await axios.delete(`${BASE_URL}/todos/${id + API_KEY}`);
 
-        this.setState({listData});
+        this.getListData();
     }
 
-    addItem(item) {
-        this.setState({
-            listData: [item, ...this.state.listData]
-        });
+    async addItem(item) {
+        await axios.post(`${BASE_URL}/todos${API_KEY}`, item);
+
+        this.getListData();
     }
 
-    getListData() {
-        setTimeout(() => {
-        this.setState({listData});
-        }, 500);
+    async getListData() {
+
+        try {
+            const response = await axios.get(`${BASE_URL}/todos${API_KEY}`);
+
+            console.log('Response:', response);
+
+            this.setState({
+                listData: response.data.todos
+            });
+        } catch (err) {
+            console.log('ERROR:', err.message);
+        }
+        /*
+        axios.get(`${BASE_URL}/todos${API_KEY}`).then(resp => {
+            console.log('Resp:', resp.data.todos);
+            this.setState({
+                listData: resp.data.todos
+            });
+        })
+        */
     }
 
     render() {
